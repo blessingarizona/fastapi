@@ -4,4 +4,4 @@ class Todo(BaseModel):
     name: str
     due_date: str
     description: str
-    done: bool = False
+    
