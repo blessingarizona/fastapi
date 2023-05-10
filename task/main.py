@@ -25,3 +25,7 @@ def create(request: schemas.Todo, db: Session = Depends(get_db)):
     db.refresh(new_todo)
     return new_todo
 
+@app.get("/todo/")
+def all(db: Session = Depends(get_db)):
+    todos = db.query(models.Todo).all()
+    return todos
