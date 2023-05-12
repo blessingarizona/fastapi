@@ -17,24 +17,54 @@ def get_db():
     finally:
         db.close()
 
-@app.post("/todo/", status_code=status.HTTP_201_CREATED)
-def create(request: schemas.Todo, db: Session = Depends(get_db)):
-    new_todo = models.Todo(title=request.title, body=request.body)
-    db.add(new_todo)
-    db.commit()
-    db.refresh(new_todo)
-    return new_todo
+db = []
 
-@app.get("/todo/")
-def all(db: Session = Depends(get_db)):
-    todos = db.query(models.Todo).all()
-    return todos
-
-@app.get("/todo/{id}", status_code=200)
-def show(id, db: Session = Depends(get_db)):
-    todo = db.query(models.Todo).filter(models.Todo.id == id).first()
-    if not todo:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail=f"Todo with the id {id} is not available")
-        
+@app.post("/todo/")
+async def create_todo(todo: schemas.Todo, db: Session = Depends(get_db)):
+    db.Depends(todo)
     return todo
+
+@app.get("/todo/", response_model=List[schemas.Todo])
+async def get_all_todos(todo: schemas.Todo, db: Session = Depends(get_db)):
+    return db
+
+@app.get("/todo/done", response_model=List[schemas.Todo])
+async def get_done_todos(todo: schemas.Todo, db: Session = Depends(get_db)):
+    return [todo for todo in db if todo.done]
+
+@app.get("/todo/{id}")
+async def get_todo(id: int):
+
+    try:
+        return db[id]
+    except:
+       raise HTTPException (status_code=404, detail="Todo not Found")
+
+@app.put("/todo/{id}")
+async def update_todo(id: int, todo: schemas.Todo):
+    
+    try:
+
+        db[id] = todo
+        return db[id]
+
+    except:
+
+        raise HTTPException(status_code=404, detail="Todo Not Found")
+
+
+@app.delete("/todo/{id}")
+async def delete_todo(id: int):
+
+    try:
+
+        obj = db[id]
+        db.pop(id)
+        return obj
+
+    except:
+
+        raise HTTPException(status_code=404, detail="Todo Not Found")
+
+
     
