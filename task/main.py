@@ -4,6 +4,7 @@ import schemas, models
 from typing import List
 from database import engine, SessionLocal
 from sqlalchemy.orm import Session
+from passlib import CryptContext
 
 
 app = FastAPI()
@@ -56,9 +57,12 @@ def destory(id, db: Session = Depends(get_db)):
     db.commit()
     return 'done'
     
+pwd_cxt = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
 @app.post("/user/")
 def create_user(request: schemas.User, db: Session = Depends(get_db)):
-    new_user = models.User(name=request.name,email=request.email,password=request.password)
+    hashedPassword = pwd_cxt.hash(request.password)
+    new_user = models.User(name=request.name,email=request.email,password=hashedPassword)
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
