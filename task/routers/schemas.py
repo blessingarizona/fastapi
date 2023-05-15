@@ -1,14 +1,6 @@
 from pydantic import BaseModel
 
-class Todo(BaseModel):
-    title: str
-    body: str
-    
 
-class User(BaseModel):
-    name: str
-    email: str
-    password: str
 
 class Login(BaseModel):
     username: str
@@ -21,4 +13,3 @@ class Token(BaseModel):
 
 class TokenData(BaseModel):
     username: str | None = None
-    

@@ -2,21 +2,22 @@ from fastapi import FastAPI, Response, Depends, status, HTTPException
 from typing import Optional 
 import schemas, models
 from typing import List
-from database import engine, SessionLocal
+from database import engine, get_db
 from sqlalchemy.orm import Session
-from passlib import CryptContext
+from passlib.context import CryptContext
+from routers import authentication
 
 
 app = FastAPI()
 
 models.Base.metadata.create_all(bind=engine)
 
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+# def get_db():
+#     db = SessionLocal()
+#     try:
+#         yield db
+#     finally:
+#         db.close()
 
 db = []
 
@@ -28,10 +29,10 @@ def create(request: schemas.Todo, db: Session = Depends(get_db)):
     db.refresh(new_todo)
     return new_todo
 
-@app.get("/todo/")
-def all(db: Session = Depends(get_db)):
-    todos = db.query(models.Todo).all()
-    return todos
+# @app.get("/todo/")
+# def all(db: Session = Depends(get_db)):
+#     todos = db.query(models.Todo).all()
+#     return todos
 
 @app.get("/todo/{id}", status_code=200)
 def show(id, db: Session = Depends(get_db)):
@@ -68,4 +69,5 @@ def create_user(request: schemas.User, db: Session = Depends(get_db)):
     db.refresh(new_user)
     return new_user
     
+app.include_router(authentication.router)
     
